@@ -108,13 +108,17 @@ bool GameBoard::isAdjacent(const Position& from, const Position& to) const {
 }
 
 bool GameBoard::isOnStartLine(const Position& pos, Player player) const {
-    if (player == PLAYER1) return pos.row == 4;
-    if (player == PLAYER2) return pos.row == 0;
+    // Player 1 starts at row 0, targets row 4 (opponent's start)
+    // Player 2 starts at row 4, targets row 0 (opponent's start)
+    if (player == PLAYER1) return pos.row == 4; // On opponent's start line
+    if (player == PLAYER2) return pos.row == 0; // On opponent's start line
     return false;
 }
 
 bool GameBoard::canShoot(const Position& from, const Position& to, Player shooter) const {
+    // Can't shoot while on opponent's start line
     if (isOnStartLine(from, shooter)) return false;
+    // Can only shoot adjacent enemies
     return isAdjacent(from, to);
 }
 
@@ -143,15 +147,23 @@ void GameBoard::checkAndRemoveShot(const Position& movedTo) {
     Player shooter = (Player)getCell(movedTo);
     if (shooter == NONE) return;
 
+    // Can't shoot while on opponent's start line
+    if (isOnStartLine(movedTo, shooter)) return;
+
     const auto& neighbors = adjacency[movedTo.row][movedTo.col];
 
     for (const auto& neighborPos : neighbors) {
         int target = getCell(neighborPos);
+        // Check if there's an enemy piece adjacent
         if (target != NONE && target != shooter) {
-            if (canShoot(movedTo, neighborPos, shooter)) {
+            // Both must be adjacent to shoot
+            if (isAdjacent(movedTo, neighborPos)) {
+                // Remove the target
                 setCell(neighborPos, NONE);
                 killedUnits[target]++;
+                // Record that this position made a kill (for revival)
                 killerPositions[shooter].push_back(movedTo);
+                break; // Only one kill per move
             }
         }
     }

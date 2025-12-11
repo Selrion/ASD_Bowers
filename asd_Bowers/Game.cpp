@@ -1,11 +1,6 @@
 #include "Game.h"
 #include <cmath>
 
-#define BOARD_OFFSET_X 250
-#define BOARD_OFFSET_Y 100
-#define CELL_SIZE 100
-#define NODE_RADIUS 25
-
 Game::Game() : window(nullptr), renderer(nullptr), font(nullptr),
 smallFont(nullptr), ai(nullptr), running(false),
 vsAI(true), pieceSelected(false), messageTimer(0) {
@@ -149,9 +144,9 @@ Position Game::screenToBoard(int x, int y) const {
 
             int dx = boardX - px;
             int dy = boardY - py;
-            float dist = sqrt(dx * dx + dy * dy);
+            double dist = sqrt((double)(dx * dx + dy * dy));
 
-            if (dist < 30) {
+            if (dist < 30.0) {
                 return Position(r, c);
             }
         }
@@ -200,10 +195,12 @@ void Game::drawBoard() {
             for (int i = 0; i < 25; i++) {
                 int radius = 25 - i;
                 for (int angle = 0; angle < 360; angle += 10) {
-                    int px1 = x + radius * cos(angle * 3.14159 / 180);
-                    int py1 = y + radius * sin(angle * 3.14159 / 180);
-                    int px2 = x + radius * cos((angle + 10) * 3.14159 / 180);
-                    int py2 = y + radius * sin((angle + 10) * 3.14159 / 180);
+                    double rad1 = angle * 3.14159 / 180.0;
+                    double rad2 = (angle + 10) * 3.14159 / 180.0;
+                    int px1 = x + (int)(radius * cos(rad1));
+                    int py1 = y + (int)(radius * sin(rad1));
+                    int px2 = x + (int)(radius * cos(rad2));
+                    int py2 = y + (int)(radius * sin(rad2));
 
                     SDL_RenderDrawLine(renderer,
                         BOARD_OFFSET_X + px1, BOARD_OFFSET_Y + py1,
@@ -220,8 +217,9 @@ void Game::drawBoard() {
         SDL_SetRenderDrawColor(renderer, 255, 255, 0, 128);
         for (int r = 20; r < 30; r++) {
             for (int angle = 0; angle < 360; angle += 5) {
-                int px = x + r * cos(angle * 3.14159 / 180);
-                int py = y + r * sin(angle * 3.14159 / 180);
+                double rad = angle * 3.14159 / 180.0;
+                int px = x + (int)(r * cos(rad));
+                int py = y + (int)(r * sin(rad));
                 SDL_RenderDrawPoint(renderer, BOARD_OFFSET_X + px, BOARD_OFFSET_Y + py);
             }
         }
@@ -247,8 +245,9 @@ void Game::drawPieces() {
                 SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
                 for (int r = 18; r < 22; r++) {
                     for (int angle = 0; angle < 360; angle += 5) {
-                        int px = x + r * cos(angle * 3.14159 / 180);
-                        int py = y + r * sin(angle * 3.14159 / 180);
+                        double rad = angle * 3.14159 / 180.0;
+                        int px = x + (int)(r * cos(rad));
+                        int py = y + (int)(r * sin(rad));
                         SDL_RenderDrawPoint(renderer, BOARD_OFFSET_X + px, BOARD_OFFSET_Y + py);
                     }
                 }
@@ -258,10 +257,12 @@ void Game::drawPieces() {
             for (int i = 0; i < 18; i++) {
                 int radius = 18 - i;
                 for (int angle = 0; angle < 360; angle += 10) {
-                    int px1 = x + radius * cos(angle * 3.14159 / 180);
-                    int py1 = y + radius * sin(angle * 3.14159 / 180);
-                    int px2 = x + radius * cos((angle + 10) * 3.14159 / 180);
-                    int py2 = y + radius * sin((angle + 10) * 3.14159 / 180);
+                    double rad1 = angle * 3.14159 / 180.0;
+                    double rad2 = (angle + 10) * 3.14159 / 180.0;
+                    int px1 = x + (int)(radius * cos(rad1));
+                    int py1 = y + (int)(radius * sin(rad1));
+                    int px2 = x + (int)(radius * cos(rad2));
+                    int py2 = y + (int)(radius * sin(rad2));
 
                     SDL_RenderDrawLine(renderer,
                         BOARD_OFFSET_X + px1, BOARD_OFFSET_Y + py1,
@@ -271,10 +272,12 @@ void Game::drawPieces() {
 
             SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
             for (int angle = 0; angle < 360; angle += 10) {
-                int px1 = x + 18 * cos(angle * 3.14159 / 180);
-                int py1 = y + 18 * sin(angle * 3.14159 / 180);
-                int px2 = x + 18 * cos((angle + 10) * 3.14159 / 180);
-                int py2 = y + 18 * sin((angle + 10) * 3.14159 / 180);
+                double rad1 = angle * 3.14159 / 180.0;
+                double rad2 = (angle + 10) * 3.14159 / 180.0;
+                int px1 = x + (int)(18 * cos(rad1));
+                int py1 = y + (int)(18 * sin(rad1));
+                int px2 = x + (int)(18 * cos(rad2));
+                int py2 = y + (int)(18 * sin(rad2));
 
                 SDL_RenderDrawLine(renderer,
                     BOARD_OFFSET_X + px1, BOARD_OFFSET_Y + py1,
