@@ -147,25 +147,34 @@ void GameBoard::checkAndRemoveShot(const Position& movedTo) {
     Player shooter = (Player)getCell(movedTo);
     if (shooter == NONE) return;
 
-    // Can't shoot while on opponent's start line
-    if (isOnStartLine(movedTo, shooter)) return;
+    // Rule: Can't shoot while standing on opponent's start line
+    // Player 1 targets row 4 (opponent's start), Player 2 targets row 0
+    int opponentStartRow = (shooter == PLAYER1) ? 4 : 0;
+    if (movedTo.row == opponentStartRow) {
+        return; // Can't shoot from opponent's start line
+    }
 
+    // Check all adjacent positions for enemy units
     const auto& neighbors = adjacency[movedTo.row][movedTo.col];
 
-    for (const auto& neighborPos : neighbors) {
-        int target = getCell(neighborPos);
-        // Check if there's an enemy piece adjacent
-        if (target != NONE && target != shooter) {
-            // Both must be adjacent to shoot
-            if (isAdjacent(movedTo, neighborPos)) {
-                // Remove the target
-                setCell(neighborPos, NONE);
-                killedUnits[target]++;
-                // Record that this position made a kill (for revival)
-                killerPositions[shooter].push_back(movedTo);
-                break; // Only one kill per move
-            }
+    for (const auto& targetPos : neighbors) {
+        int targetPiece = getCell(targetPos);
+
+        // Is there an enemy on this adjacent position?
+        if (targetPiece == NONE || targetPiece == shooter) {
+            continue; // No enemy here
         }
+
+        // Enemy found on "line of fire" (adjacent position = direct line in graph)
+        // Remove the enemy
+        setCell(targetPos, NONE);
+        killedUnits[targetPiece]++;
+
+        // Record this position as having made a kill (needed for revival rule)
+        killerPositions[shooter].push_back(movedTo);
+
+        // Only one kill per move
+        return;
     }
 }
 
@@ -228,6 +237,7 @@ void GameBoard::makeMove(const Move& move) {
         setCell(move.from, NONE);
         setCell(move.to, piece);
 
+        // Update move history for 3-move rule
         auto it = moveHistory.find(move.to);
         if (it != moveHistory.end() && it->second.first == move.from) {
             moveHistory[move.to].second++;
@@ -238,6 +248,7 @@ void GameBoard::makeMove(const Move& move) {
 
         moveHistory.erase(move.from);
 
+        // Check if this move results in shooting an enemy
         checkAndRemoveShot(move.to);
     }
 }

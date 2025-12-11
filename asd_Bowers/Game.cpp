@@ -402,6 +402,10 @@ void Game::handleKeyPress(SDL_Keycode key) {
         vsAI = !vsAI;
         showMessage(vsAI ? "AI Enabled" : "AI Disabled", 60);
         break;
+
+    default:
+        // Ignore other keys
+        break;
     }
 }
 
